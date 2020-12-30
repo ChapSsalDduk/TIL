@@ -1,6 +1,6 @@
 # Git 명령어
 
-## 기초
+## 기본 명령어
 
 |                    명령어                     |                      설명                       |
 | :-------------------------------------------: | :---------------------------------------------: |
@@ -11,8 +11,12 @@
 | `git config — global user.name “user_name ”`  |             git 계정 name 변경하기              |
 | `git config — global user.email “user_email”` |              git 계정Mail변경하기               |
 |                   `git log`                   |          commit history 를 보는 명령어          |
+|          `git remote add ??? 'url'`           |                    url 등록                     |
+|             `git push ??? master`             |      commit 된 내용을 연결된 github에 전송      |
 
-## 기본
+---
+
+
 
 - git clone git_path : 코드가져오기
 - git checkout branch_name : 브랜치 선택하기
