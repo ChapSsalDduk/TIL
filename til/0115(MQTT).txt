@@ -1,0 +1,210 @@
+json
+- 네트워크에서 구조화된 정보를 전송하는데 표준으로 쓰이는것이 json이다.
+
+# 사전(파이썬 자료구조 객체) --> 문자열로 표현
+# msg = json.dumps(dic)   # json.dump() : 파일에 대해서 작업, dumps() : 문자열로 만들어줌
+# print(type(msg))   # 문자열 msg를 전송
+# print(msg)
+
+# # 문자열 msg를 수신
+# # 문자열 --> 사전 객체로 복원
+# dic2 = json.loads(msg)  # json.load() : 위 dump()와 dumps()와 관계가 같음.
+# print(type(dic2))
+# print(dic2)
+
+dumps() 는 구조화, loads() 복호화라고 보면됨.
+
+###### MQTT #######
+
+MQTT( Message Queu Telemetry Transport )
+- IOT 분야에서의 국제 표준
+- ( https://www.joinc.co.kr/w/man/12/MQTT/Tutorial )
+- 경량의 Publish/Subscribe(Pub/Sub) 메시징 프로토콜
+- 구독자 패턴( Subscribe )을 지님 
+( 구독자는 센서가 전달하는 정보에 관심있는 장비들 )
+- 주로 센서가 Publisher 가 됨. ( 정보 수집 후 전달 )
+
+- M2M(machine-to-machine)와 IoT(Internet of things) 분야 적용
+ ○ 특징
+  ▪ 저전력
+  ▪ 신뢰할 수 없는 네트워크에서 운용 가능
+  ▪ No TCP/IP 기반 운영 가능
+   → 소형기기의 제어와 센서정보 수집에 유리
+
+❖ 활용
+ ○ 센서(Sensor) 정보 수집 
+ ○ 제어
+  ▪ 센서로 부터 받은 데이터를 토대로 기기 제어
+  ▪ 각 기기에 MQTT broker를 설치 또는 중앙 MQTT broker에 bind
+ ○ Message Push Server 
+  ▪ 모바일 애플리케이션을 위한 메시지 Push 서버
+  ▪ 페이스북의 경우 MQTT를 이용해서 메시지를 push 하고 있음
+
+❖ MQTT 특징
+ ○ Publish/Subscribe
+  ▪ Publisher과 Subscriber은 모두 Broker에 대한 클라이언트로 작동
+  ▪ Publisher는 토픽을 발행
+  ▪ Subscriber은 토픽을 구독
+  ▪ 둘 다 Broker 서버에 연
+
+ ○ 토픽
+  ▪ Pub와 Sub는 토픽을 기준으로 작동
+  ▪ 토픽은 슬래시(/)를 이용해서 계층적으로 구성 (구조화)
+    - 정보를 구조화
+  ▪ 대량의 센서 기기들을 효율적으로 관리
+
+ ○ QoS(Quality of Service - 서비스의 품질)
+  ▪ 3단계의 QoS(Quality of service) 제공
+    ⁃ 0 : 메시지는 한번만 전달하며, 전달여부를 확인하지 않는다. Fire and
+          Forget 타입이다. (보통 로컬 네트워크에서 쓰임)
+
+    ⁃ 1 : 메시지는 반드시 한번 이상 전달된다. 하지만 메시지의 핸드셰이킹 과정을 엄밀하게 추적하지 않기 때문에, 중복전송될 수도 있다.
+
+    ⁃ 2 : 메시지는 한번만 전달된다. 메시지의 핸드셰이킹 과정을 추적한다. 높은 품질을 보장하지만 성능의 희생이 따른다. 
+	
+	(IoT 센서들은 대부분 1번까지만 한다. - 센서 데이터수집은 대부분 0, 제어는 1번을 주로 씀.)
+
+  ▪ 서비스의 종류에 따라서 적당한 QoS 레벨을 선택
+  ▪ No TCP/IP와 TCP/IP가 섞여있는 로컬 네트워크에서는 QoS 1, 2를 선택
+  ▪ 원격 네트워크에서는 0번
+    ⁃ 네트워크의 신뢰성을 믿음
+  ▪ 클라이언트는 MQTT queue에 있는 메시지를 읽기 위해서 이전에 연결했던
+     MQTT에 연결
+    ⁃ QoS 레벨은 0으로 하고, 소프트웨어에서 QoS를 처리
+
+❖ MQTT 브로커들
+ ○ Mosquitto MQTT broker (모스키토 MQTT 브로커)
+  ▪ BSD 라이센스 기반의 오픈소스 메시지 브로커
+
+------mosquitto_pub -h localhost
+ -h 는 호스트의 약자
+ -v 동작 정보를 전부 출력하라는 명령어
+ #, +는 와일드카드
+
+❖ paho-mqtt 모듈
+ ○ MQTT Python Client 모듈 
+ ○ 설치
+  ▪ sudo pip3 install paho-mqtt
+ ○ api 문서
+  ▪ https://www.eclipse.org/paho/clients/python/docs/
+
+❖ 구독자(Subscriber) 개발 절차
+ ○ MQTT 클라이언트 클래스 인스턴스화
+ ○ 브로커 연결
+ ○ 토픽 구독 신청
+ ○ 토픽 수신시 호출할 핸들러 등록
+ ○ 토픽 수신 대기
+ ○ 토픽 수신시 처리 - 핸들러 호출
+
+❖ 발행자(Publisher) 개발 절차
+ ○ MQTT 클라이언트 클래스 인스턴스화
+ ○ 브로커 연결
+ ○ 필요시 토픽 발행(전송)
+
+❖ 클라이언트 클래스 인스턴스화하기 : Client( )
+ ○ client_id (* 중요 *)
+  ▪ 브로커에 연결할 때 사용되는 고유 클라이언트 ID 문자열.
+  ▪ 비어있거나 None인 경우, 무작위로 결정
+    ⁃ 이 경우 clean_session은 True여야함.
+ ○ clean_session
+  ▪ 브로커와의 연결이 끊어졌을 때 브로커가 클라이언트의 정보를 지울지 여부
+ ○ userdata
+  ▪ 핸들러에서 사용한 사용자 정의 데이터 타입
+ ○ protocol
+  ▪ MQTT 버전( MQTTv31 or MQTTv311)
+ ○ transport
+  ▪ 전송 프로토콜("tcp" 또는 "websocket")
+
+❖ 연결 : connect( ) (동기식)
+ ○ host
+  ▪ 브로커의 호스트명 또는 IP 주소
+ ○ port
+  ▪ 브로커의 포트 번호
+ ○ keepalive
+  ▪ 브로커와의 통신 사이에 허용되는 최대 기간 (초). (디폴트는 60초)
+  ▪ 다른 메시지가 교환되지 않으면 클라이언트가 브로커에 ping 메시지를 보낼 속도를 제어
+ ○ bind_address
+  ▪ 네트워크 인터페이스(랜카드)가 여러 개 인 경우, 바인딩할 IP 주소
+ ○ 콜백(Callback)
+  ▪ 연결 성공시 on_connect() 콜백 호출
+
+❖ 비동기 연결 : connect_async ( ) (비동기식)
+ ○ loop_start () 와 함께사용 하여 비 차단 방식으로 연결
+
+❖ 재연결 : reconnect( )
+  ○ 이전에 사용했던 접속 정보로 다시 접속 시도
+
+❖ 연결 끊기 : disconnect( )
+
+❖ 네트워크 루프(프로그래밍)
+ ○ 메시지 수신 처리를 위해서는 스레드로 구현 필요
+ ○ subscriber는 지속적으로 수신을 해야 함
+ 
+ ○ loop(timeout)
+  - 1개의 mqtt 메시지 수신/전송을 처리
+  - 주로 publish할 때 직접 호출
+
+ ○ loop_start()
+  - 새로운 스레드를 생성, 새로 생성된 스레드가 loop()를 호출함
+   - 생성되는 스레드는 데몬 스레드(메인 스레드가 종료할 때 함께 종료됨)
+  - 자동으로 reconnect 실행됨
+  - 멈출때는 loop_stop()
+
+ ○ loop_forever()
+  - 현재 스레드로 loop()를 호출
+  - 무한 루프이므로 현재 스레드로 다른 작업은 할 수 없음
+
+❖ 토픽 발간하기 : publish( )
+ ○ topic
+  ▪ 메시지를 게시 할 주제
+ ○ payload
+  ▪ 전송할 메시지
+  ▪ 문자열 또는 바이트 데이터(struct.pack() 필요)
+ ○ qos
+  ▪ qos(quality of service) 수준
+ ○ retain
+  ▪ True 설정한 경우, 해당 토픽에 대한 가장 최근의 메시지 유지
+
+❖ 구독/구독 취소: subscribe( ) / unsubscribe( )
+
+❖ 콜백
+ ○ 특정 이벤트(접속 성공, 메시지 수신 등)가 발생했을 때 호출되는 핸들러 (함수)
+
+ ○ on_connect(client, userdata, flags, rc)
+  ▪ 브로커가 연결 요청에 응답 할 때 호출
+  ▪ client
+    ⁃ 이 콜백의 클라이언트 인스턴스
+  ▪ userdata
+    ⁃ Client() 또는 user_data_set()에서 설정한 사용자 데이터
+  ▪ flags
+    ⁃ 브로커가 보낸 응답 플래그
+  ▪ rc
+    ⁃ 연결 결과
+    ⁃ 0 : 연결 성공
+    ⁃ 1~5 : 연결 거부
+    ⁃ 6-255 : 현재 사용되지 않습니다.
+
+ ○ on_disconnect(client, userdata, rc)
+  ▪ 브로커와 연결이 끊어질때 호출
+  ▪ client 
+    ⁃ 이 콜백의 클라이언트 인스턴스
+  ▪ userdata
+    ⁃ Client() 또는 user_data_set()에서 설정한 사용자 데이터
+  ▪ rc
+    ⁃ 처리 결과
+    ⁃ 0 : 정상적으로 끊김
+    ⁃ 0이 아닌 값 : 예외에 의해 끊어짐
+
+ ○ on_message(client, userdata, message) (userdata는 잘 안씀, message가 중요)
+  ▪ subscriber에서 메시지(토픽)가 수신됬을 때 호출
+
+  ▪ client
+    ⁃ 이 콜백의 클라이언트 인스턴스
+
+  ▪ userdata
+    ⁃ Client() 또는 user_data_set()에서 설정한 사용자 데이터
+
+  ▪ message
+    ⁃ MQTTMessage 인스턴스.
+    ⁃ 속성 : topic , payload , qos , retain (topic과 payload가 중요)
+
